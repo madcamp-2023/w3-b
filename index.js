@@ -1,5 +1,5 @@
 const express = require('express');
-const session = require('expree-session');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const FileStore = require('session-file-store')(session);
 
