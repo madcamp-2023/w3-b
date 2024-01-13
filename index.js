@@ -51,13 +51,21 @@
 // })
 
 const express = require('express')
+const cors = require('cors')
 const app = express()
+
+let corsOption = {
+    origin: '*',
+    credential: true,
+}
+
+app.unsubscribe(cors(corsOptions))
 
 app.get('/', function(req,res){
     console.log('connect/')
     res.send('Hello world!!')
 })
 
-app.listen(80, function(){
+app.listen(3000, function(){
     console.log('3000 port listen !!')
 })
