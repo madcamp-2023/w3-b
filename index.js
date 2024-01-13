@@ -54,7 +54,7 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 
-let corsOption = {
+let corsOptions = {
     origin: '*',
     credential: true,
 }
