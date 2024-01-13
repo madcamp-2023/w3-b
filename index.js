@@ -59,7 +59,7 @@ let corsOptions = {
     credential: true,
 }
 
-app.unsubscribe(cors(corsOptions))
+app.use(cors(corsOptions))
 
 app.get('/', function(req,res){
     console.log('connect/')
