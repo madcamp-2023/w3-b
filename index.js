@@ -2,20 +2,27 @@ const express = require('express')
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const FileStore = require('session-file-store')(session);
+const cors = require('cors')
+const bcrypt = require('bcrypt');
 
 var db = require('./db.js');
-
-const port = 3000;
-const cors = require('cors')
 const app = express()
-const bcrypt = require('bcrypt');
+const port = 3001;
+
+app.use(cors(corsOptions))
+app.use(bodyParser.urlencoded({extended: false}));
+app.use(express.json());
+app.use(session({
+    secret: 'yoonseo',
+    resave: false,
+    saveUninitialized: true,
+    store:new FileStore(),
+}));
 
 let corsOptions = {
     origin: '*',
     credential: true,
 }
-
-app.use(cors(corsOptions))
 
 app.get("/user", (req, res) => {
     const {userId, password} = req.query;
