@@ -9,6 +9,13 @@ var db = require('./db.js');
 const app = express()
 const port = 3001;
 
+
+let corsOptions = {
+    origin: '*',
+    credential: true,
+}
+
+
 app.use(cors(corsOptions))
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.json());
@@ -18,11 +25,6 @@ app.use(session({
     saveUninitialized: true,
     store:new FileStore(),
 }));
-
-let corsOptions = {
-    origin: '*',
-    credential: true,
-}
 
 app.get("/user", (req, res) => {
     const {userId, password} = req.query;
