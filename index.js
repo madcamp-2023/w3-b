@@ -26,6 +26,7 @@ app.use(session({
     store:new FileStore(),
 }));
 
+//Read (회원조회)
 app.get("/user", (req, res) => {
     const {userId, password} = req.query;
     db.query('SELECT * FROM users WHERE userId = ?', [userId], (err, results) => {
@@ -49,6 +50,7 @@ app.get("/user", (req, res) => {
     });
 });
 
+//Create (회원가입)
 app.post("/user", (req, res) => {
     const {name, userId, password, code} = req.body;
 
@@ -78,6 +80,33 @@ app.post("/user", (req, res) => {
                 res.status(201).json({message: 'User added successfully'});
             }
         });
+    });
+});
+
+//Delete (회원탈퇴)
+app.delete("/user", (req, res) => {
+    const {userId} = req.query;
+    const deleteQuery = 'DELETE FROM users WHERE userId = ?';
+    //users table에서 해당 user 삭제
+    db.query(deleteQuery, [userId], (err, results) => {
+        if(err){
+            console.error('Error deleting review: ', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        if(results.affectedRows === 0){
+            return res.status(404).json({error: "User not found for the given userId"});
+        }
+
+        //reviews table에서 해당 review 삭제
+        const deleteReviewQuery = 'DELETE FROM reviews WHERE userId = ?';
+        db.query(deleteReviewQuery, [userId], (reviewErr, reviewResults) => {
+            if(reviewErr){
+                console.error('Error deleting review: ', reviewErr);
+                return res.status(500).send('Internal Server Error');
+            }
+            console.log('Review deleted successfully');
+            res.status(200).json({message: 'User deleted successfully'});
+        })
     });
 });
 
@@ -118,21 +147,124 @@ app.get("/post", (req, res) => {
             console.error('Error fetching posts: ', err);
             res.status(500).send('Internal Server Error');
         } else{
-            const postsArray = [];
-            for (const post of results){
-                postsArray.push({
-                    id: post.id,
-                    title: post.title,
-                    content: post.content,
-                    createdDate: post.createdDate
-                });
-            }
+            const postsArray = results.map(post => ({
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                createdDate: post.createdDate
+            }));
             res.json(postsArray);
         }
+    });
+});
+
+//Create
+app.post("/review", (req, res) => {
+    const{userId, title, content, next, github} = req.body;
+    //reviews에 동일한 userId로 이미 등록된 review 있는지 검사
+    const checkDuplicateQuery = 'SELECT COUNT (*) AS count FROM reviews WHERE userId = ?';
+    db.query(checkDuplicateQuery, [userId], (duplicateErr, duplicateResults) => {
+        if(duplicateErr){
+            console.error('Error checking duplicate userId: ', duplicateErr);
+            return res.status(500).send('Internal Server Error');
+        }
+        const duplicateCount = duplicateResults[0].count;
+
+        if(duplicateCount > 0){
+            return res.status(409).json({error: "User already submitted a review"});
+        }
+        //users table에 userId로 등록된 name 가져오기
+        const getNameQuery = 'SELECT name FROM users WHERE userId = ?';
+        db.query(getNameQuery, [userId], (nameErr, nameResults) => {
+            if(nameErr){
+                console.error('Error fetching name: ', nameErr);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            if(nameResults.length === 0){
+                return res.status(404).json({error: "User not found"});
+            }
+
+            const name = nameResults[0].name;
+
+            const insertQuery = 'INSERT INTO reviews (userId, name, title, content, next, github) VALUES (?, ?, ?, ?, ?, ?)';
+            db.query(insertQuery, [userId, name, title, content, next, github], (insertErr, insertResults) => {
+                if(insertErr){
+                    console.error('Error adding review: ', insertErr);
+                    return res.status(500).send('Internal Server Error');
+                }
+                console.log(insertResults);
+                res.status(201).json({message: 'Review added successfully'});
+            });
+        });
+    });
+});
+
+    
+//Read
+app.get("/review", (req, res) => {
+    const selectQuery = 'SELECT name, title, content, next, github FROM reviews ORDER BY RAND()';
+    db.query(selectQuery, (err, results) => {
+        if(err){
+            console.error('Error fetching review: ', err);
+            res.status(500).send('Internal Server Error');
+        } else{
+            const reviewsArray = results.map(review => ({
+                name: review.name,
+                title: review.title,
+                content: review.content,
+                next: review.next,
+                github: review.github
+            }));
+            res.json(reviewsArray);
+        }
+    });
+    
+});
+
+//Delete
+app.delete("/review", (req, res) => {
+    const {userId} = req.query;
+    const deleteQuery = 'DELETE FROM reviews WHERE userId = ?';
+    db.query(deleteQuery, [userId], (err, results) => {
+        if(err){
+            console.error('Error deleting review: ', err);
+            return res.status(500).send('Internal Server Error');
+        }
+        if(results.affectedRows === 0){
+            return res.status(404).json({error: "Review not found for the given userId"});
+        }
+        res.status(200).json({message: 'Review deleted successfully'});
+    });
+});
+
+//Update
+app.put("/review", (req, res) => {
+    const{userId} = req.query;
+    const{name, title, content, next, github} = req.body;
+
+    const checkReviewQuery = 'SELECT * FROM reviews WHERE userId = ?';
+    db.query(checkReviewQuery, [userId], (checkErr, checkResults) => {
+        if(checkErr){
+            console.error('Error checking review existence: ',checkErr);
+            return res.status(500).send('Internal Server Error');
+        }
+        if(checkResults.length === 0){
+            return res.status(404).json({error: "Review not found for the given userId"});
+        }
+        const updateQuery = 'UPDATE reviews SET name = ?, title =?, content = ?, next = ?, github = ? WHERE userId = ?';
+        db.query(updateQuery, [name, title, content, next, github, userId], (updateErr, updateResults) => {
+            if(updateErr){
+                console.error('Error updating reviews: ', updateErr);
+                return res.status(500).send('Internal Server Error');
+            }
+            console.log('updateResults: ', updateResults);
+            res.status(200).json({message: 'Review updated successfully'});
+        });
     });
 });
 
 
 app.listen(port, function(){
     console.log(`${port} port listen !!`)
-})
+});
