@@ -131,9 +131,9 @@ app.post("/post", (req, res) => {
 });
 
 app.get("/post", (req, res) => {
-    const {number} = req.query;
-
-    //number 값 유효성 검사
+    const {page} = req.query;
+    const number = parseInt(page,10);
+    // paper 값 유효성 검사
     if(!number || isNaN(number)){
         return res.status(400).json({error: "Invalid number parameter"});
     }
