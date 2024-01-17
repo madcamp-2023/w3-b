@@ -150,7 +150,7 @@ app.get("/post", (req, res) => {
             res.status(500).send('Internal Server Error');
         } else{
             const postsArray = results.map(post => ({
-                id: post.id,
+                number: post.id,
                 title: post.title,
                 content: post.content,
                 createdDate: post.createdDate
