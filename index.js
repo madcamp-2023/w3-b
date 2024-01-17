@@ -138,11 +138,13 @@ app.get("/post", (req, res) => {
         return res.status(400).json({error: "Invalid number parameter"});
     }
 
-    const startId = (number -1) *10 +1;
-    const endId = startId + 9;
-
-    const selectQuery = 'SELECT id, title, content, DATE_FORMAT(createdDate, "%Y년 %m월 %d일") AS createdDate FROM posts WHERE id BETWEEN ? AND ?';
-    db.query(selectQuery, [startId, endId], (err, results) => {
+    // const startId = (number -1) *10 +1;
+    // const endId = startId + 9;
+    const pageSize = 10;
+    const offset = (number -1)*pageSize;
+    const selectQuery = 'SELECT id, title, content, DATE_FORMAT(createdDate, "%Y년 %m월 %d일") AS createdDate FROM posts ORDER BY id DESC LIMIT ?, ?';
+    // const selectQuery = 'SELECT id, title, content, DATE_FORMAT(createdDate, "%Y년 %m월 %d일") AS createdDate FROM posts WHERE id BETWEEN ? AND ? ORDER BY id DESC';
+    db.query(selectQuery, [offset, pageSize], (err, results) => {
         if(err){
             console.error('Error fetching posts: ', err);
             res.status(500).send('Internal Server Error');
