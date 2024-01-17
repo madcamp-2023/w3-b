@@ -2,6 +2,15 @@
 
 <img width="774" alt="image" src="https://github.com/madcamp-2023/w3-b/assets/99087502/184d5170-1487-438e-a99d-ca2a38a98eca">
 
+## Topic
+
+MADCAMP WEEK3
+
+## Teammate
+
+* UNIST 컴퓨터공학과 18학번 정해준
+* 고려대학교 컴퓨터학과 20학번 김윤서
+
 ## Project Overview
 
 2010년부터 지속된 몰입캠프가 초창기에 비해 참여자가 80명으로 늘어나고 앞으로의 운영계획 변화(학생 운영진, 노션 등)로 인하여 기존 홈페이지의 리뉴얼을 기획하게 되었습니다.
