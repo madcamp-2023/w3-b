@@ -38,7 +38,7 @@ app.get("/user", (req, res) => {
                 const passwordMatch = bcrypt.compareSync(password, user.password);
 
                 if(passwordMatch){
-                    const responseData = {id: user.id, name: user.name};
+                    const responseData = {id: user.userId, name: user.name};
                     res.json(responseData);
                 } else{
                     res.status(401).json({error: 'Invalid password'});
@@ -213,6 +213,7 @@ app.get("/review", (req, res) => {
         } else{
             const reviewsArray = results.map(review => ({
                 name: review.name,
+                userId: review.userId,
                 title: review.title,
                 content: review.content,
                 next: review.next,
